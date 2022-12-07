@@ -92,15 +92,18 @@ function addSizeToParentPaths(currentPath, size) {
     }
 }
 
-function sumSmallDirectorySizes(size) {
-    const sum = Object.values(dir_sizes).reduce((acc, curr) => {
-        return acc += curr <= size ? curr : 0;
-    },0)
+function findDirectoryToDelete(diskSpace, neededSpace) {
+    const spaceToFree = neededSpace - (diskSpace - dir_sizes['/']);
+
+    const deletionCandidates = Object.entries(dir_sizes)
+        .filter(dir => dir[1] >= spaceToFree)
+        .sort((a,b) => {
+            return a[1] > b[1] ? 1 : -1;
+        })
     
-    console.log(sum);
-    return sum;
+    console.log(deletionCandidates[0][1])
+    return deletionCandidates[0][1]
 }
 
 parseInput()
-sumSmallDirectorySizes(100000)
-
+findDirectoryToDelete(70000000, 30000000)
