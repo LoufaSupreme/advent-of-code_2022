@@ -119,15 +119,16 @@ function sumSmallDirs(tree) {
 function main() {
     createTree();
 
+    const maxDirectorySize = 100000;
     let sumSmallDirectorySizes = 0;
     getSize(tree, function cb(name, size) {
         console.log({ name:name, size:size });
 
-        if (size <= 100000) sumSmallDirectorySizes += size;
+        if (size <= maxDirectorySize) sumSmallDirectorySizes += size;
     });
 
     displayTree(tree);
-    
+
     console.log(sumSmallDirectorySizes);
 }
 
