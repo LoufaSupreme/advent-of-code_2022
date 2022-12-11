@@ -64,9 +64,15 @@ function moveTail(currTailPos, currHeadPos) {
     if (displacement <= 1) return;
     
     // diagonal
+    else if (dx !== 0 && dy !== 0) {
+        
+    }
     else if (dx > 0 && dy > 0) return;
     else if (dx < 0 && dy < 0) return;
-    else tailPos.x += dx
+    else {
+        tailPos.x += dx;
+        tailPos.y += dy;
+    };
 
 
 
