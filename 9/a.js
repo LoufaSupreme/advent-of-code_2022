@@ -1,17 +1,15 @@
 const fs = require('fs');
 
-// const input = fs.readFileSync('input.txt').toString();
+const input = fs.readFileSync('input.txt').toString();
 
-const input = `\
-R 4
-U 4
-L 3
-D 1
-R 4
-D 1
-L 5
-R 2\
-`
+// const input = `\
+// R 10
+// U 10
+// L 10
+// D 10
+// U 10
+// R 10\
+// `
 
 const moves = input
     .split('\n')
@@ -21,7 +19,7 @@ const moves = input
         return line;
     });
 
-const visited = new Set();
+const visited = ['0-0']
 const headPos = {
     x: 0,
     y: 0
@@ -52,44 +50,46 @@ function moveHead(currentPos, [direction, amount]) {
     for (let i = 0; i < amount; i++) {
         headPos.x = currentPos.x + dx;
         headPos.y = currentPos.y + dy;
+        // console.log(`Head: ${headPos.x},${headPos.y}`)
 
-        moveTail(tailPos, dx, dy);
+        moveTail(tailPos, headPos, dx, dy);
     }
 }
 
-function moveTail(currTailPos, currHeadPos) {
+function moveTail(currTailPos, currHeadPos, dx, dy) {
     
     const displacement = (currHeadPos.x - currTailPos.x) ** 2 + (currHeadPos.y - currTailPos.y) ** 2;
 
-    if (displacement <= 1) return;
-    
-    // diagonal
-    else if (dx !== 0 && dy !== 0) {
-        
-    }
-    else if (dx > 0 && dy > 0) return;
-    else if (dx < 0 && dy < 0) return;
-    else {
+    if (displacement <= 2) return;
+
+    else if (displacement == 4) {
         tailPos.x += dx;
         tailPos.y += dy;
-    };
+    }
 
+    else {
+        const x_dir = currHeadPos.x - currTailPos.x > 0 ? 1 : -1;
+        const y_dir = currHeadPos.y - currTailPos.y > 0 ? 1 : -1;
+        tailPos.x += x_dir;
+        tailPos.y += y_dir;
+    }
+    // console.log(displacement)
+    // console.log(`Tail: ${tailPos.x},${tailPos.y}`)
 
-
-    if (currHeadPos.x - currTailPos.x > 1) tailPos.x += 1;
-    else if (currHeadPos.x - currTailPos.y < -1) tailPos.x -= 1;
-    if (currHeadPos.y - currTailPos.y > 1) tailPos.y += 1;
-    else if (currHeadPos.y - currTailPos.y < -1) tailPos.y -= 1;
-
-    console.log(`Moving Tail to ${tailPos.x},${tailPos.y}`)
-    visited.add(`${tailPos.x},${tailPos.y}`);
+    if (!visited.includes(`${tailPos.x},${tailPos.y}`)) visited.push(`${tailPos.x},${tailPos.y}`);
 }
 
 function main() {
     for (const move of moves) {
         moveHead(headPos, move);
     }
+    // moveHead(headPos, ['U', 2])
+    // moveHead(headPos, ['D', 2])
+    // moveHead(headPos, ['R', 2])
+    // moveHead(headPos, ['U', 2])
+    console.log(visited.length)
     return visited;
 }
 
-console.log(main())
+// console.log(main())
+main()
