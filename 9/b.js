@@ -21,7 +21,6 @@ const moves = input
         return line;
     });
 
-// const points = Array(9).fill({x: 0, y: 0});
 const points = [
     { x: 0, y: 0 },
     { x: 0, y: 0 },
@@ -60,7 +59,6 @@ function moveHead(head, [direction, amount]) {
         head.y += dy;
 
         updatePoints();
-        // console.log(`Head: ${headPos.x},${headPos.y}`)
 
     }
 }
@@ -71,14 +69,10 @@ function updatePoints() {
         if (i === points.length-1) {
             if (!visited.includes(`${points[i].x},${points[i].y}`)) visited.push(`${points[i].x},${points[i].y}`);
         }
-
-        // console.log(`Point${i}: ${points[i].x},${points[i].y}`)
     }
 }
 
-function followPoint(pointIndex, targetPointIdx) {
-    // console.log(`Updating Pt${pointIndex}: ${points[pointIndex].x},${points[pointIndex].y} compared to Pt${targetPointIdx}: ${points[targetPointIdx].x},${points[targetPointIdx].y}`)
-    
+function followPoint(pointIndex, targetPointIdx) {    
     const displacement = (points[targetPointIdx].x - points[pointIndex].x) ** 2 + (points[targetPointIdx].y - points[pointIndex].y) ** 2;
 
     if (displacement <= 2) return;
