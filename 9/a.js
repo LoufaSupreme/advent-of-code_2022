@@ -3,12 +3,14 @@ const fs = require('fs');
 const input = fs.readFileSync('input.txt').toString();
 
 // const input = `\
-// R 10
-// U 10
-// L 10
-// D 10
-// U 10
-// R 10\
+// R 4
+// U 4
+// L 3
+// D 1
+// R 4
+// D 1
+// L 5
+// R 2\
 // `
 
 const moves = input
@@ -19,7 +21,7 @@ const moves = input
         return line;
     });
 
-const visited = ['0-0']
+const visited = ['0,0']
 const headPos = {
     x: 0,
     y: 0
@@ -52,31 +54,32 @@ function moveHead(currentPos, [direction, amount]) {
         headPos.y = currentPos.y + dy;
         // console.log(`Head: ${headPos.x},${headPos.y}`)
 
-        moveTail(tailPos, headPos, dx, dy);
+        moveTail(tailPos, headPos);
     }
 }
 
-function moveTail(currTailPos, currHeadPos, dx, dy) {
+function moveTail(currTailPos, currHeadPos) {
     
     const displacement = (currHeadPos.x - currTailPos.x) ** 2 + (currHeadPos.y - currTailPos.y) ** 2;
 
     if (displacement <= 2) return;
 
-    else if (displacement == 4) {
+    else {
+        let dx = 0;
+        let dy = 0;
+        if (currHeadPos.x - currTailPos.x > 0) dx = 1;
+        else if (currHeadPos.x - currTailPos.x < 0) dx = -1;
+        if (currHeadPos.y - currTailPos.y > 0) dy = 1;
+        else if (currHeadPos.y - currTailPos.y < 0) dy = -1;
+
         tailPos.x += dx;
         tailPos.y += dy;
+
+        if (!visited.includes(`${tailPos.x},${tailPos.y}`)) visited.push(`${tailPos.x},${tailPos.y}`);
     }
 
-    else {
-        const x_dir = currHeadPos.x - currTailPos.x > 0 ? 1 : -1;
-        const y_dir = currHeadPos.y - currTailPos.y > 0 ? 1 : -1;
-        tailPos.x += x_dir;
-        tailPos.y += y_dir;
-    }
-    // console.log(displacement)
     // console.log(`Tail: ${tailPos.x},${tailPos.y}`)
 
-    if (!visited.includes(`${tailPos.x},${tailPos.y}`)) visited.push(`${tailPos.x},${tailPos.y}`);
 }
 
 function main() {
