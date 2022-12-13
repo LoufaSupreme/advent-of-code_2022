@@ -16,7 +16,7 @@ function parseInput(input) {
 }
 
 function isEnd(pos, grid) {
-    if (grid[pos.y][pos.x] === 'E') return true;
+    if (grid[pos.y][pos.x] === 'a') return true;
     return false;
 }
 
@@ -26,10 +26,9 @@ function isOnGrid(pos, grid) {
 }
 
 function isValidElevation(src, dest) {
-    if (dest === 'E') dest = 'z';
-    if (src === 'S') src = 'a';
-    if (dest === 'S') src = 'a';
-    if ( (dest.charCodeAt() - src.charCodeAt()) <= 1 ) return true;
+    if (src === 'E') src = 'z';
+    if (dest === 'S') dest = 'a';
+    if ( (dest.charCodeAt() - src.charCodeAt()) >= -1 ) return true;
     return false;
 }
 
@@ -51,10 +50,10 @@ function calculateValidMoves(pos, grid) {
     return validMoves;
 }
 
-function findStart(grid) {
+function findEnd(grid) {
     for (let row = 0; row < grid.length; row++) {
         for (let col = 0; col < grid[0].length; col++) {
-            if (grid[row][col] === 'S') {
+            if (grid[row][col] === 'E') {
                 return {
                     x: col,
                     y: row
@@ -90,12 +89,12 @@ function displayPath(grid, paths) {
         }
     }
     board = board.map(row => row.join('')).join('\n')
-    fs.writeFileSync('result.txt', board);
+    fs.writeFileSync('result2.txt', board);
 }
 
 function main() {
     const grid = parseInput(input);
-    const start = findStart(grid);
+    const start = findEnd(grid);
     // #steps, current pos
     const q = [[ 0, start, [] ]];
     const visited = new Set();
@@ -105,8 +104,7 @@ function main() {
         visited.add(`x: ${pos.x}, y: ${pos.y}`);
         if (isEnd(pos, grid)) {
             displayPath(grid, [...path, pos]);
-            // return [steps, pos];
-        console.log(steps)
+            return [steps, pos];
         }
 
         const moves = calculateValidMoves(pos, grid);
@@ -118,7 +116,6 @@ function main() {
             }
         }
     }
-    // return visited
 }
 
 // const grid = parseInput(input);
