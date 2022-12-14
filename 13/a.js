@@ -29,34 +29,38 @@ const input = `\
 `;
 
 function parseInput(input) {
-    let stringArray = input
+    return input
         .split('\n\n')
         .map(pair => {
             pair = pair.split('\n');
             return pair.map(strArr => {
-                return strArr.map(char => char)
+                strArr = strArr.slice(1).slice(0,-1);
+                return parseStringifiedArray(strArr)
             })
         });
 }
 
-function parseStringifiedArray(str, arr = []) {
-    const newArr = [];
-    let returnedArr = [];
-    for (let i = 0; i < str.length; i++) {
-        if (str[i] === ',') continue;
+// recursive
+// takes a stringified nested array w/o the beginnning parentheses: '1,[2,[3,[4,[5,6,0]]]],8,9'
+// returns a nested array: [1,[2,[3,[4,[5,6,0]]]],8,9]
+function parseStringifiedArray(str, arr = [], i = 0) {
+    for (i; i < str.length; i++) {
+        if (str[i] === ',' || str[i] === ' ') continue;
         else if (str[i] === '[') {
-            const remainingStr = str.slice(i+1, str.length);
-            returnedArr = parseStringifiedArray(remainingStr, newArr);
+            const newArr = []
+            const res = parseStringifiedArray(str, newArr, i+1);
+            arr.push(res.arr);
+            i = res.idx;
         }
         else if (str[i] === ']') {
-            arr.push(returnedArr);
-            return arr;
+            return {arr: arr, idx: i};
         }
         else {
-            newArr.push(+str[i]);
+            arr.push(+str[i]);
         }
     }
+    return arr;
 }
 
-// console.log(parseInput(input))
-console.log(parseStringifiedArray('[4, [1]]'))
+console.log(parseInput(input))
+// const arr = parseStringifiedArray('1,[2,[3,[4,[5,6,0]]]],8,9')
