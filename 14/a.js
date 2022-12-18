@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-// const input = fs.readFileSync('input.txt').toString();
-const input = fs.readFileSync('sample.txt').toString();
+const input = fs.readFileSync('input.txt').toString();
+// const input = fs.readFileSync('sample.txt').toString();
 
 
 function parseInput(input) {
@@ -43,8 +43,52 @@ function populateMap(lines) {
     });
 }
 
-// console.log(parseInput(input));
-const points = parseInput(input);
-console.log(populateMap(points));
+function drawMap(map, sandOrigin) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const pt of map) {
+        if (pt.x < minX) minX = pt.x;
+        if (pt.y < minY) minY = pt.y;
+        if (pt.x > maxX) maxX = pt.x;
+        if (pt.y > maxY) maxY = pt.y;
+    }
 
+    const mapPadding = 2;
+
+    const grid = Array(maxY-minY+1+mapPadding*2).fill(0).map(elem => Array(maxX-minX+1+mapPadding*2).fill(' '));
+    for (let row = 0; row < grid.length; row++) {
+        for (let col = 0; col < grid[0].length; col++) {
+            isVal = map.find(elem => {
+                return elem.x === col + minX - mapPadding && elem.y === row + minY - mapPadding;
+            });
+            if (row === grid.length - 1) grid[row][col] = '_';
+            if (col === 0 || col === grid[0].length - 1) grid[row][col] = '|'
+            if (isVal) {
+                grid[row][col] = '🧱';
+            }
+            if (sandOrigin.x === col+minX-mapPadding && sandOrigin.y === row+minY-mapPadding) {
+                grid[row][col] = "+"
+            }
+        }
+    }
+
+    const drawnMap = grid.map(line => line.join('')).join('\n');
+    fs.writeFileSync('map.txt', drawnMap);
+}
+
+function main() {
+    const sandOrigin = {
+        x: 500,
+        y: 0
+    }
+    const points = parseInput(input);
+    const map = [...populateMap(points), sandOrigin];
+    // console.log(map)
+    drawMap(map, sandOrigin)
+}
+
+// console.log(parseInput(input));
+main();
 
