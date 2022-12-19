@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+// WARNING: VERY SLOW - NOT OPTIMIZED (BUT IT WORKS)
+
 const input = fs.readFileSync('input.txt').toString();
 // const input = fs.readFileSync('sample.txt').toString();
 
@@ -39,12 +41,8 @@ function populateMap(lines) {
     });
 }
 
-function hitWall(map, target) {
-    return map.find(point => point.x === target.x && point.y === target.y);
-}
 
-
-function drawMap(map) {
+function findMapBoundaries(map) {
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -55,7 +53,12 @@ function drawMap(map) {
         if (pt.x > maxX) maxX = pt.x;
         if (pt.y > maxY) maxY = pt.y;
     }
+    return {minX, minY, maxX, maxY};
+}
 
+
+function drawMap(map, boundaries, floor) {
+    const {minX, minY, maxX, maxY} = boundaries;
     const mapPadding = 2;
 
     const grid = Array(maxY-minY+1+mapPadding*2).fill(0).map(elem => Array(maxX-minX+1+mapPadding*2).fill(' '));
@@ -63,27 +66,34 @@ function drawMap(map) {
         for (let col = 0; col < grid[0].length; col++) {
             
             if (row === grid.length - 1) grid[row][col] = '_';
-            if (col === 0 || col === grid[0].length - 1) grid[row][col] = '|';
-
-            const onMap = hitWall(map, {x: col + minX - mapPadding, y: row + minY - mapPadding});
+            
+            const onMap = hitWall(map, floor, {x: col + minX - mapPadding, y: row + minY - mapPadding});
             if (onMap) {
                 if (onMap.type === 'wall') grid[row][col] = '🧱';
                 else if (onMap.type === 'sand') grid[row][col] = 'o';
                 else if (onMap.type === 'Sand Origin') grid[row][col] = "+"
+                else if (onMap === 'floor') grid[row][col] = "#"
             }
+            if (col === 0 || col === grid[0].length - 1) grid[row][col] = '|';
         }
     }
 
     const drawnMap = grid.map(line => line.join('')).join('\n');
-    fs.writeFileSync('map.txt', drawnMap);
-    return maxY;
+    fs.writeFileSync('map_partb.txt', drawnMap);
 }
 
-function isOnMap(lowestPoint, pos) {
-    return pos.y <= lowestPoint;
+function sandAtTop(map, sandOrigin) {
+    return map.find(point => point.x === sandOrigin.x && point.y === sandOrigin.y && point.type === 'sand');
 }
 
-function createSandParticle(map, sandOrigin, lowestPoint) {
+function hitWall(map, floor, target) {
+    const foundPoint = map.find(point => point.x === target.x && point.y === target.y);
+    if (foundPoint) return foundPoint;
+    else if (target.y === floor) return 'floor';
+    else return false;
+}
+
+function createSandParticle(map, sandOrigin, highestPoint, floor) {
     const sand = {
         x: sandOrigin.x,
         y: sandOrigin.y,
@@ -92,23 +102,24 @@ function createSandParticle(map, sandOrigin, lowestPoint) {
     };
 
     while (!sand.atRest) {
-        if (!isOnMap(lowestPoint, sand)) return;
+        if (sandAtTop(map, sandOrigin)) return;
         // if we can move down w/o hitting a wall, continue
-        if (!hitWall(map, {x: sand.x, y: sand.y+1})) sand.y += 1;
+        if (!hitWall(map, floor, {x: sand.x, y: sand.y+1})) sand.y += 1;
         // if we'll hit a wall on the next move:
         else {
             // check if we can go left
-            if (!hitWall(map, {x: sand.x-1, y: sand.y+1})) {
+            if (!hitWall(map, floor, {x: sand.x-1, y: sand.y+1})) {
                 sand.x -= 1;
                 sand.y += 1;
             }
             // check if we can go right
-            else if (!hitWall(map, {x: sand.x+1, y: sand.y+1})) {
+            else if (!hitWall(map, floor, {x: sand.x+1, y: sand.y+1})) {
                 sand.x += 1;
                 sand.y += 1;
             }
             // if we can't go anywhere then the sand stops
             else {
+                // if (sand.y <= sandOrigin.y) return
                 sand.atRest = true;
                 return sand;
             }
@@ -124,14 +135,14 @@ function main() {
     }
     const points = parseInput(input);
     let map = [...populateMap(points), sandOrigin];
-    // console.log(map)
-    const lowestPoint = drawMap(map);
+    let mapBoundaries = findMapBoundaries(map);
+    const floor = mapBoundaries.maxY + 2;
 
     let complete = false;
     let sandParticles = 0;
     while (!complete) {
-    // for (let i = 0; i < 25; i++) {
-        const sand = createSandParticle(map, sandOrigin, lowestPoint);
+    // for (let i = 0; i < 700; i++) {
+        const sand = createSandParticle(map, sandOrigin, mapBoundaries.minY, floor);
         if (sand) {
             map = [...map, sand];
             sandParticles++;
@@ -142,8 +153,9 @@ function main() {
             complete = true;
         }
     }
-    console.log(sandParticles)
-    drawMap(map);
+    console.log(sandParticles);
+    // mapBoundaries = findMapBoundaries(map);
+    // drawMap(map, mapBoundaries, floor);
 }
 
 // console.log(parseInput(input));
